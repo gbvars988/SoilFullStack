@@ -1,0 +1,74 @@
+.bg-colour {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  width: auto;
+  background-color: var(--primary-color);
+}
+
+.main-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-container h1 {
+  font-family: "Merienda";
+  color: var(--secondary-color);
+  font-size: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-container h3 {
+  font-family: "Merienda";
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.main-container-left,
+.main-container-right {
+  flex-basis: 100%;
+}
+
+.main-container-left {
+  display: flex;
+  height: 55vh;
+  width: auto;
+  flex-direction: column;
+}
+
+.main-container-right {
+  display: flex;
+  background-color: var(--white);
+  height: 55vh;
+  width: 10vw;
+}
+
+.main-container-divider {
+  border-right: 2px solid var(--white);
+  background-color: var(--white);
+  height: 65vh;
+  margin: 0 20px;
+  width: 0.5vw;
+  box-shadow: 0 0 10px 0 var(--white);
+  border-radius: 6px;
+}
+
+.signup-button {
+  background-color: var(--secondary-color);
+  color: var(--white);
+  font-family: "Merienda";
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  margin: 20px;
+  cursor: pointer;
+}

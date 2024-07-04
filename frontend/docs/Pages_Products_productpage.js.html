@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Pages/Products/productpage.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Pages/Products/productpage.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview ProductPage component that displays product details, allows users to add products to the cart,
+ * and provides functionality for adding, editing, deleting, and replying to reviews. It also handles following/unfollowing users.
+ */
+
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import {
+  getProductById,
+  getReviewsByProduct,
+  addReview,
+  updateReview,
+  deleteReview,
+  followUser,
+  unfollowUser,
+  getFollowingUsers,
+} from "../../Data/repository.js";
+import { useUser } from "../../Context/UserContext";
+import { useCart } from "../../Pages/Cart/useCart";
+import "./productpage.css";
+import sanitizeHtml from "sanitize-html";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import ReactStars from "react-stars";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Apple from "../../Assets/apple.jpg";
+import Banana from "../../Assets/banana.jpg";
+import Pear from "../../Assets/pear.jpg";
+import Strawberry from "../../Assets/strawberry.jpg";
+import Grape from "../../Assets/grape.jpg";
+import Kiwi from "../../Assets/kiwi.jpg";
+import Orange from "../../Assets/orange.jpg";
+import Pineapple from "../../Assets/pineapple.jpg";
+import Watermelon from "../../Assets/watermelon.jpg";
+import Steak from "../../Assets/steak.jpg";
+import Lobster from "../../Assets/lobster.jpg";
+import Caviar from "../../Assets/caviar.jpg";
+import Truffle from "../../Assets/truffle.jpg";
+import Oyster from "../../Assets/oyster.jpg";
+
+/**
+ * ProductPage component.
+ * @returns {JSX.Element}
+ */
+const ProductPage = () => {
+  const { productId } = useParams();
+  const { user } = useUser();
+  const { addToCart } = useCart();
+  const [product, setProduct] = useState({});
+  const [reviews, setReviews] = useState([]);
+  const [newReview, setNewReview] = useState("");
+  const [newStars, setNewStars] = useState(1);
+  const [replyContent, setReplyContent] = useState("");
+  const [replyReviewId, setReplyReviewId] = useState(null);
+  const [editReviewId, setEditReviewId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [editStars, setEditStars] = useState(1);
+  const [following, setFollowing] = useState({});
+  const [wordCount, setWordCount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const productImages = {
+    Apple: Apple,
+    Banana: Banana,
+    Pear: Pear,
+    Strawberry: Strawberry,
+    Grape: Grape,
+    Kiwi: Kiwi,
+    Orange: Orange,
+    Pineapple: Pineapple,
+    Watermelon: Watermelon,
+    Steak: Steak,
+    Lobster: Lobster,
+    Caviar: Caviar,
+    Truffle: Truffle,
+    Oyster: Oyster,
+  };
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const productData = await getProductById(productId);
+        setProduct(productData);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    const fetchReviews = async (page = 1) => {
+      try {
+        const reviewsData = await getReviewsByProduct(productId, page);
+        const initializedReviews = reviewsData.reviews.map((review) => ({
+          ...review,
+          replies: review.replies ? review.replies : [],
+        }));
+        setReviews(initializedReviews);
+        setTotalPages(reviewsData.totalPages);
+        setCurrentPage(reviewsData.currentPage);
+      } catch (error) {
+        console.error("Error fetching reviews;", error);
+      }
+    };
+
+    const fetchFollowing = async () => {
+      if (user &amp;&amp; user.username) {
+        try {
+          const followingData = await getFollowingUsers(user.username);
+          console.log("Following data from backend: ", followingData);
+          const followingMap = followingData.reduce((acc, curr) => {
+            acc[curr] = true;
+            return acc;
+          }, {});
+          console.log("Following map: ", followingMap);
+          setFollowing(followingMap);
+        } catch (error) {
+          console.error("Error fetching following users:", error);
+        }
+      }
+    };
+
+    fetchProduct();
+    fetchReviews(currentPage);
+    fetchFollowing();
+  }, [productId, currentPage]);
+
+  /**
+   * Handles adding a new review.
+   */
+  const handleAddReview = async () => {
+    if (wordCount > 100) {
+      setErrorMessage("Review cannot exceed 100 words.");
+      return;
+    }
+    try {
+      const sanitizedContent = sanitizeHtml(newReview);
+      const reviewData = {
+        content: sanitizedContent,
+        stars: newStars,
+        product_id: productId,
+        username: user.username,
+        parent_review_id: null,
+      };
+      console.log(reviewData);
+      const createdReview = await addReview(reviewData);
+      setReviews([...reviews, { ...createdReview, replies: [] }]);
+      setNewReview("");
+      setNewStars(1);
+      setWordCount(0);
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
+
+  /**
+   * Handles updating an existing review.
+   * @param {number} reviewId - The id of the review to update.
+   * @param {string} updatedContent - The updated content of the review.
+   * @param {number} updatedStars - The updated star rating of the review.
+   */
+  const handleUpdateReview = async (reviewId, updatedContent, updatedStars) => {
+    const words = updatedContent.split(/\s+/);
+    if (words.length > 100) {
+      setErrorMessage("Review cannot exceed 100 words.");
+      return;
+    }
+    try {
+      const sanitizedContent = sanitizeHtml(updatedContent);
+      const updatedReview = await updateReview(reviewId, {
+        content: sanitizedContent,
+        stars: updatedStars,
+      });
+      setReviews(
+        reviews.map((review) =>
+          review.review_id === reviewId ? updatedReview : review
+        )
+      );
+      setEditReviewId(null);
+    } catch (error) {
+      console.error("Error updating review: ", error);
+    }
+  };
+
+  /**
+   * Sets the state for editing a review.
+   * @param {object} review - The review object to edit.
+   */
+  const handleEditReview = (review) => {
+    setEditReviewId(review.review_id);
+    setEditContent(review.content);
+    setEditStars(review.stars);
+  };
+
+  /**
+   * Handles adding a reply to a review.
+   * @param {number} parentReviewId - The id of the review to reply to.
+   */
+  const handleAddReply = async (parentReviewId) => {
+    const words = replyContent.split(/\s+/);
+    if (words.length > 100) {
+      setErrorMessage("Reply cannot exceed 100 words.");
+      return;
+    }
+    try {
+      console.log("Adding reply to review ID:", parentReviewId);
+      const sanitizedContent = sanitizeHtml(replyContent);
+      const reply = {
+        content: sanitizedContent,
+        stars: null,
+        product_id: productId,
+        username: user.username,
+        parent_review_id: parentReviewId,
+      };
+
+      const createdReply = await addReview(reply);
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.review_id === parentReviewId
+            ? { ...review, replies: [...review.replies, createdReply] }
+            : review
+        )
+      );
+      setReplyContent("");
+      setReplyReviewId(null);
+    } catch (error) {
+      console.error("Error adding reply", error);
+    }
+  };
+
+  /**
+   * Deletes a review.
+   * @param {number} reviewId - The id of the review to delete.
+   */
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await deleteReview(reviewId);
+      setReviews(reviews.filter((review) => review.review_id !== reviewId));
+    } catch (error) {
+      console.error("Error while deleting review: ", error);
+    }
+  };
+
+  /**
+   * Handles following a user.
+   * @param {string} followed - The username of the user to follow.
+   */
+  const handleFollowUser = async (followed) => {
+    try {
+      // Change state before API request for optimised UI.
+      setFollowing((prevFollowing) => ({
+        ...prevFollowing,
+        [followed]: true,
+      }));
+      await followUser(followed, user.username);
+    } catch (error) {
+      console.error("Error following user: ", error);
+      // Revert changes if request fails.
+      setFollowing((prevFollowing) => ({
+        ...prevFollowing,
+        [followed]: false,
+      }));
+    }
+  };
+
+  /**
+   * Handles unfollowing a user.
+   * @param {string} followed - The username of the user to unfollow.
+   */
+  const handleUnfollowUser = async (followed) => {
+    try {
+      setFollowing((prevFollowing) => ({
+        ...prevFollowing,
+        [followed]: false,
+      }));
+      await unfollowUser(followed, user.username);
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+      setFollowing((prevFollowing) => ({
+        ...prevFollowing,
+        [followed]: true,
+      }));
+    }
+  };
+
+  /**
+   * Handles the content change for a review and updates word count.
+   * @param {string} content - The content of the review.
+   */
+  const handleReviewChange = (content) => {
+    console.log("handleReviewChange called with content:", content);
+    const words = content.split(/\s+/);
+    if (words.length > 100) {
+      console.log("Setting error message due to word limit exceeded");
+      setErrorMessage("Review cannot exceed 100 words.");
+      setWordCount(words.length);
+    } else {
+      console.log("Content is within the limit, setting new review content");
+      setErrorMessage("");
+      setNewReview(content);
+      setWordCount(words.length);
+    }
+  };
+
+  /**
+   * Handles adding a product to the cart and shows a success toast message.
+   */
+  const handleAddToCart = async () => {
+    await addToCart(product);
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  /**
+   * Handles changing the current page for pagination.
+   * @param {number} page - The page number to change to.
+   */
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  return (
+    &lt;div className="product-page">
+      &lt;div className="product-details">
+        &lt;h1>{product.name}&lt;/h1>
+        {productImages[product.name] &amp;&amp; (
+          &lt;img src={productImages[product.name]} alt={product.name} />
+        )}
+        &lt;p>{product.description}&lt;/p>
+        &lt;p>Price: ${product.price}&lt;/p>
+        &lt;div className="average-rating">
+          &lt;p>Average Rating:&lt;/p>
+          &lt;ReactStars
+            count={5}
+            value={product.averageRating || 0}
+            size={24}
+            color2={"#ffd700"}
+            edit={false}
+            half={false}
+          />
+        &lt;/div>
+        &lt;button className="add-to-cart-button" onClick={handleAddToCart}>
+          Add to Cart
+        &lt;/button>
+      &lt;/div>
+
+      &lt;h2>Reviews&lt;/h2>
+      {reviews.map((review) => (
+        &lt;div key={review.review_id} className="review">
+          {editReviewId === review.review_id ? (
+            &lt;div>
+              &lt;ReactQuill
+                value={editContent}
+                onChange={setEditContent}
+                theme="snow"
+              />
+              {errorMessage &amp;&amp; &lt;p className="error-message">{errorMessage}&lt;/p>}
+              &lt;ReactStars
+                count={5}
+                value={editStars}
+                size={24}
+                color2={"#ffd700"}
+                onChange={setEditStars}
+                half={false}
+              />
+              &lt;div className="review-buttons">
+                &lt;button
+                  onClick={() =>
+                    handleUpdateReview(review.review_id, editContent, editStars)
+                  }
+                >
+                  Save
+                &lt;/button>
+                &lt;button onClick={() => setEditReviewId(null)}>Cancel&lt;/button>
+              &lt;/div>
+            &lt;/div>
+          ) : (
+            &lt;>
+              &lt;p dangerouslySetInnerHTML={{ __html: review.content }}>&lt;/p>
+              &lt;ReactStars
+                count={5}
+                value={review.stars}
+                size={24}
+                color2={"#ffd700"}
+                edit={false}
+                half={false}
+              />
+              &lt;p>
+                By: &lt;strong>{review.username}&lt;/strong>
+              &lt;/p>
+              {review.username === user.username &amp;&amp; (
+                &lt;div className="review-buttons">
+                  &lt;button onClick={() => handleEditReview(review)}>Edit&lt;/button>
+                  &lt;button onClick={() => handleDeleteReview(review.review_id)}>
+                    Delete
+                  &lt;/button>
+                &lt;/div>
+              )}
+              {review.username !== user.username &amp;&amp; (
+                &lt;div className="follow-buttons">
+                  {following[review.username] ? (
+                    &lt;button onClick={() => handleUnfollowUser(review.username)}>
+                      Unfollow
+                    &lt;/button>
+                  ) : (
+                    &lt;button onClick={() => handleFollowUser(review.username)}>
+                      {" "}
+                      Follow
+                    &lt;/button>
+                  )}
+                &lt;/div>
+              )}
+            &lt;/>
+          )}
+          &lt;div className="replies">
+            {review.replies &amp;&amp;
+              review.replies.map((reply) => (
+                &lt;div key={reply.review_id} className="reply">
+                  &lt;p dangerouslySetInnerHTML={{ __html: reply.content }}>&lt;/p>
+                  &lt;p>By: {reply.username}&lt;/p>
+                &lt;/div>
+              ))}
+          &lt;/div>
+          &lt;div>
+            {replyReviewId === review.review_id ? (
+              &lt;div>
+                &lt;ReactQuill
+                  value={replyContent}
+                  onChange={setReplyContent}
+                  theme="snow"
+                />
+                {errorMessage &amp;&amp; (
+                  &lt;p className="error-message">{errorMessage}&lt;/p>
+                )}
+                &lt;div className="reply-buttons">
+                  &lt;button onClick={() => handleAddReply(review.review_id)}>
+                    Submit Reply
+                  &lt;/button>
+                  &lt;button onClick={() => setReplyReviewId(null)}>Cancel&lt;/button>
+                &lt;/div>
+              &lt;/div>
+            ) : (
+              &lt;button
+                className="reply-button"
+                onClick={() => setReplyReviewId(review.review_id)}
+              >
+                Reply
+              &lt;/button>
+            )}
+          &lt;/div>
+        &lt;/div>
+      ))}
+      {totalPages > 1 &amp;&amp; (
+        &lt;div className="pagination">
+          {Array.from({ length: totalPages }, (_, i) => (
+            &lt;button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={currentPage === i + 1 ? "active" : ""}
+            >
+              {i + 1}
+            &lt;/button>
+          ))}
+        &lt;/div>
+      )}
+
+      &lt;h2>Leave a Review&lt;/h2>
+      &lt;ReactQuill
+        value={newReview}
+        onChange={handleReviewChange}
+        theme="snow"
+      />
+      {errorMessage &amp;&amp; &lt;p className="error-message">{errorMessage}&lt;/p>}
+      &lt;ReactStars
+        count={5}
+        value={newStars}
+        size={24}
+        color2={"#ffd700"}
+        onChange={setNewStars}
+        half={false}
+      />
+      &lt;p className="word-count">Word count: {wordCount}/100&lt;/p>
+      &lt;button className="submit-review-button" onClick={handleAddReview}>
+        Submit Review
+      &lt;/button>
+      &lt;ToastContainer />
+    &lt;/div>
+  );
+};
+
+export default ProductPage;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Repository.html">Repository</a></li><li><a href="module-UserContext.html">UserContext</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Cart">Cart</a></li><li><a href="global.html#CheckoutForm">CheckoutForm</a></li><li><a href="global.html#ProductPage">ProductPage</a></li><li><a href="global.html#PurchaseSummary">PurchaseSummary</a></li><li><a href="global.html#useCart">useCart</a></li><li><a href="global.html#useUserData">useUserData</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 19:40:26 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+:root {
+  --primary-color: #f9f9f9;
+  --third-color: #ffffff;
+  --text-color: #333;
+  --accent-color: #558b2f; /* Dark green */
+  --accent-hover-color: #33691e; /* Darker green for hover */
+  --danger-color: #8d6e63; /* Brown */
+  --danger-hover-color: #6d4c41; /* Darker brown for hover */
+  --success-color: #28a745;
+  --success-hover-color: #218838;
+  --star-color: #ffd700;
+}
+
+.products-bg {
+  background-color: var(--primary-color);
+  padding: 20px;
+}
+
+.cart-subtotal {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.cart-subtotal h2 {
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.cart-subtotal p {
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.cart-subtotal .button {
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+}
+
+.cart-subtotal .button:hover {
+  background-color: var(--accent-hover-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.products-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.products-container h2 {
+  font-size: 2rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.normal-products,
+.special-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.product-container {
+  background-color: var(--third-color);
+  border: 1px solid var(--danger-color); /* Brown border */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  flex: 1 1 calc(23% - 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.product-container a {
+  text-decoration: none;
+  color: var(--accent-color); /* Green text */
+}
+
+.product-container a:hover {
+  text-decoration: underline;
+}
+
+.product-container h3 {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  margin: 10px 0;
+}
+
+.product-description {
+  font-size: 1rem;
+  color: #777;
+  margin: 10px 0;
+}
+
+.product-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.add-to-cart-button,
+.button {
+  background-color: var(--accent-color); /* Green button */
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.add-to-cart-button:hover,
+.button:hover {
+  background-color: var(--accent-hover-color); /* Darker green on hover */
+}
+
+.ReactStars {
+  margin: 10px 0;
+}

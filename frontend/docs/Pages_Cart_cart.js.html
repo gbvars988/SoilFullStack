@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Pages/Cart/cart.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Pages/Cart/cart.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { React, useState } from "react";
+import { Link } from "react-router-dom";
+import "./cart.css";
+import Apple from "../../Assets/apple.jpg";
+import Banana from "../../Assets/banana.jpg";
+import Pear from "../../Assets/pear.jpg";
+import Strawberry from "../../Assets/strawberry.jpg";
+import Grape from "../../Assets/grape.jpg";
+import Kiwi from "../../Assets/kiwi.jpg";
+import Orange from "../../Assets/orange.jpg";
+import Pineapple from "../../Assets/pineapple.jpg";
+import Watermelon from "../../Assets/watermelon.jpg";
+import Steak from "../../Assets/steak.jpg";
+import Lobster from "../../Assets/lobster.jpg";
+import Caviar from "../../Assets/caviar.jpg";
+import Truffle from "../../Assets/truffle.jpg";
+import Oyster from "../../Assets/oyster.jpg";
+import { useCart } from "./useCart";
+import { useNavigate } from "react-router-dom";
+
+/**
+ * Cart component displays the shopping cart items, allows quantity adjustments,
+ * item removal, and provides a checkout option.
+ *
+ * @component
+ */
+
+const Cart = () => {
+  const {
+    cart,
+    calculateTotal,
+    clearCart,
+    increaseQuantity,
+    decreaseQuantity,
+    updateQuantity,
+    removeItem,
+  } = useCart();
+
+  const productImages = {
+    Apple: Apple,
+    Banana: Banana,
+    Pear: Pear,
+    Strawberry: Strawberry,
+    Grape: Grape,
+    Kiwi: Kiwi,
+    Orange: Orange,
+    Pineapple: Pineapple,
+    Watermelon: Watermelon,
+    Steak: Steak,
+    Lobster: Lobster,
+    Caviar: Caviar,
+    Truffle: Truffle,
+    Oyster: Oyster,
+  };
+  const [showPopup, setShowPopup] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (calculateTotal() &lt;= 0) {
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 2000);
+      return;
+    }
+    navigate("/checkout");
+  };
+
+  const handleQuantityChange = (productId, newQuantity) => {
+    if (newQuantity === "") {
+      updateQuantity(productId, 0);
+    } else {
+      const quantity = parseInt(newQuantity, 10);
+      if (!isNaN(quantity)) {
+        updateQuantity(productId, quantity);
+      }
+    }
+  };
+
+  return (
+    &lt;div className="cart-bg">
+      &lt;div className="cart-container">
+        &lt;h1>Shopping Cart&lt;/h1>
+        &lt;h2>Cart Items&lt;/h2>
+        &lt;div className="cart-items">
+          {Object.keys(cart).length === 0 ? (
+            &lt;p>Cart is empty&lt;/p>
+          ) : (
+            Object.values(cart).map((item) => (
+              &lt;div key={item.product_id} className="cart-item">
+                &lt;div className="cart-item-content">
+                  &lt;div className="cart-item-details">
+                    &lt;div className="cart-item-name">{item.name}&lt;/div>
+                    &lt;div className="cart-item-quantity">
+                      Quantity: {cart[item.product_id].quantity}
+                      &lt;input
+                        type="number"
+                        value={cart[item.product_id].quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(item.product_id, e.target.value)
+                        }
+                      />
+                      &lt;button onClick={() => increaseQuantity(item.product_id)}>
+                        +
+                      &lt;/button>
+                      &lt;button onClick={() => decreaseQuantity(item.product_id)}>
+                        -
+                      &lt;/button>
+                    &lt;/div>
+                    &lt;div className="cart-item-price">
+                      Price: ${(item.price * item.quantity).toFixed(2)}
+                    &lt;/div>
+                  &lt;/div>
+                  {productImages[item.name] &amp;&amp; (
+                    &lt;img
+                      src={productImages[item.name]}
+                      alt={item.name}
+                      className="cart-item-image"
+                    />
+                  )}
+                &lt;/div>
+                &lt;button onClick={() => removeItem(item.product_id)}>
+                  Remove
+                &lt;/button>
+              &lt;/div>
+            ))
+          )}
+        &lt;/div>
+        &lt;div className="cart-total">
+          &lt;h2>Total&lt;/h2>
+          &lt;p>${calculateTotal().toFixed(2)}&lt;/p>
+        &lt;/div>
+        &lt;div className="cart-actions">
+          &lt;Link to="/products" className="cart-action-link">
+            Back to Products
+          &lt;/Link>
+          &lt;button className="clear-cart" onClick={clearCart}>
+            Clear Cart
+          &lt;/button>
+          &lt;button className="checkout-button" onClick={handleCheckout}>
+            Checkout
+          &lt;/button>
+        &lt;/div>
+      &lt;/div>
+      {showPopup &amp;&amp; (
+        &lt;div className="popup">
+          &lt;div className="popup-inner">
+            &lt;h2>Please add items to the cart.&lt;/h2>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};
+
+export default Cart;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Repository.html">Repository</a></li><li><a href="module-UserContext.html">UserContext</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Cart">Cart</a></li><li><a href="global.html#CheckoutForm">CheckoutForm</a></li><li><a href="global.html#ProductPage">ProductPage</a></li><li><a href="global.html#PurchaseSummary">PurchaseSummary</a></li><li><a href="global.html#useCart">useCart</a></li><li><a href="global.html#useUserData">useUserData</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 19:40:26 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

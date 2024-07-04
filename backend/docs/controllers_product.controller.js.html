@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/product.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/product.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const db = require("../database");
+const { Sequelize } = require("sequelize");
+
+/**
+ * Select all products.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {void} Sends a JSON response with all products and their average ratings.
+ */
+exports.all = async (req, res) => {
+  try {
+    const products = await db.product.findAll({
+      include: [
+        {
+          model: db.review,
+          attributes: [
+            [Sequelize.fn("AVG", Sequelize.col("stars")), "averageRating"],
+          ],
+        },
+      ],
+      group: ["product.product_id"],
+    });
+    console.log("return from backend products:", products);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Select one product by ID and return product details and average rating.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {string} req.params.id - The ID of the product.
+ * @returns {void} Sends a JSON response with the product details and average rating.
+ */
+exports.one = async (req, res) => {
+  try {
+    const product = await db.product.findByPk(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const averageRating = await calculateAverageRating(req.params.id);
+    res.json({ ...product.dataValues, averageRating });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * Create a new product.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {string} req.body.name - The name of the product.
+ * @param {number} req.body.price - The price of the product.
+ * @param {string} req.body.description - The description of the product.
+ * @param {number} req.body.quantity - The quantity of the product.
+ * @returns {void} Sends a JSON response with the created product data.
+ */
+exports.create = async (req, res) => {
+  const product = await db.product.create({
+    name: req.body.name,
+    price: req.body.price,
+    description: req.body.description,
+    quantity: req.body.quantity,
+  });
+
+  res.json(product);
+};
+
+/**
+ * Helper function to calculate average rating for a product.
+ *
+ * @param {number} productId - The ID of the product.
+ * @returns {Promise&lt;number>} The average rating of the product.
+ */
+const calculateAverageRating = async (productId) => {
+  const reviews = await db.review.findAll({
+    where: { product_id: productId, parent_review_id: null },
+    attributes: ["stars"],
+  });
+
+  if (reviews.length === 0) return 0;
+
+  const totalStars = reviews.reduce((sum, review) => sum + review.stars, 0);
+  return totalStars / reviews.length;
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addToCart">addToCart</a></li><li><a href="global.html#all">all</a></li><li><a href="global.html#calculateAverageRating">calculateAverageRating</a></li><li><a href="global.html#clearCart">clearCart</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createReview">createReview</a></li><li><a href="global.html#deleteReview">deleteReview</a></li><li><a href="global.html#findUserByEmail">findUserByEmail</a></li><li><a href="global.html#followUser">followUser</a></li><li><a href="global.html#getCart">getCart</a></li><li><a href="global.html#getFollowingUsers">getFollowingUsers</a></li><li><a href="global.html#getRandomInt">getRandomInt</a></li><li><a href="global.html#getReviewsByProduct">getReviewsByProduct</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#one">one</a></li><li><a href="global.html#removeItem">removeItem</a></li><li><a href="global.html#unfollowUser">unfollowUser</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateQuantity">updateQuantity</a></li><li><a href="global.html#updateReview">updateReview</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 20:06:33 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

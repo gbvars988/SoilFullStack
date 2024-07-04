@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Data/repository.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Data/repository.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file repository.js
+ * @description Provides functions to interact with the backend API for various operations,
+ * including user authentication, user management, cart operations, product retrieval,
+ * review management, and follow/unfollow functionality. It also includes helper functions
+ * to interact with local storage to cache user session.
+ *
+ * @module Repository
+ */
+
+import axios from "axios";
+
+// --- Constants ----------------------------------------------------------------------------------
+const API_HOST = "http://localhost:4000";
+const USER_KEY = "user";
+
+// --- User ---------------------------------------------------------------------------------------
+async function verifyUser(username, password) {
+  const response = await axios.get(API_HOST + "/api/users/login", {
+    params: { username, password },
+  });
+  const user = response.data;
+
+  if (user !== null) setUser(user);
+
+  return user;
+}
+
+async function findUser(id) {
+  const response = await axios.get(API_HOST + `/api/users/select/${id}`);
+
+  return response.data;
+}
+
+async function findUserByEmail(email) {
+  try {
+    const response = await axios.get(`${API_HOST}/api/users/email/${email}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error finding user by email:", error);
+    return null;
+  }
+}
+
+async function createUser(user) {
+  const response = await axios.post(API_HOST + "/api/users", user);
+
+  return response.data;
+}
+
+async function getFollowingUsers(username) {
+  const response = await axios.get(
+    `${API_HOST}/api/users/following/${username}`
+  );
+  return response.data;
+}
+
+// --- Helper functions to interact with local storage --------------------------------------------
+function setUser(user) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+function getUser() {
+  return JSON.parse(localStorage.getItem(USER_KEY));
+}
+
+function removeUser() {
+  localStorage.removeItem(USER_KEY);
+}
+
+export {
+  verifyUser,
+  findUser,
+  findUserByEmail,
+  createUser,
+  getUser,
+  removeUser,
+  getFollowingUsers,
+};
+
+// --- Update User ---------------------------------------------------------------------------------------
+async function getUsers() {
+  const response = await axios.get(API_HOST + "/api/users");
+
+  return response.data;
+}
+
+async function updateUser(id, user) {
+  const response = await axios.put(`${API_HOST}/api/users/${id}`, user);
+
+  return response.data;
+}
+
+export { getUsers, updateUser };
+
+// --- Cart ----------------------------------------------------------------------------------------------
+async function addToCart(cartitem) {
+  const response = await axios.post(`${API_HOST}/api/cart`, cartitem);
+
+  return response.data;
+}
+
+async function getCart(username) {
+  const response = await axios.get(`${API_HOST}/api/cart/${username}`);
+  return response.data;
+}
+
+async function removeItem(cartItem) {
+  const response = await axios.delete(`${API_HOST}/api/cart`, {
+    data: cartItem,
+  });
+  return response.data;
+}
+
+async function updateQuantity(cartItem) {
+  const response = await axios.put(`${API_HOST}/api/cart`, cartItem);
+  return response.data;
+}
+
+async function clearCart(cartItem) {
+  const response = await axios.post(`${API_HOST}/api/cart/clear`, cartItem);
+  return response.data;
+}
+
+export { addToCart, getCart, removeItem, updateQuantity, clearCart };
+
+// --- Products -----------------------------------------------------------------------------------------
+async function getProducts() {
+  const response = await axios.get(`${API_HOST}/api/products`);
+  return response.data;
+}
+
+async function getProductById(id) {
+  const response = await axios.get(`${API_HOST}/api/products/select/${id}`);
+  return response.data;
+}
+
+export { getProducts, getProductById };
+
+// --- Reviews ------------------------------------------------------------------------------------------
+async function getReviewsByProduct(id, page = 1, limit = 3) {
+  const response = await axios.get(`${API_HOST}/api/reviews/${id}`, {
+    params: { page, limit },
+  });
+  return response.data;
+}
+
+async function addReview(review) {
+  try {
+    const response = await axios.post(`${API_HOST}/api/reviews`, review);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding review:", error);
+    throw error;
+  }
+}
+
+async function updateReview(id, content) {
+  const response = await axios.put(`${API_HOST}/api/reviews/${id}`, content);
+  return response.data;
+}
+async function deleteReview(id) {
+  const response = await axios.delete(`${API_HOST}/api/reviews/${id}`);
+  return response.data;
+}
+
+export { getReviewsByProduct, addReview, updateReview, deleteReview };
+
+// --- Follow --------------------------------------------------------------------------------------------
+async function followUser(followed, follower) {
+  const response = await axios.post(`${API_HOST}/api/follow/follow`, {
+    followed,
+    follower,
+  });
+  return response.data;
+}
+
+async function unfollowUser(followed, follower) {
+  const response = await axios.post(`${API_HOST}/api/follow/unfollow`, {
+    followed,
+    follower,
+  });
+  return response.data;
+}
+
+export { followUser, unfollowUser };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Repository.html">Repository</a></li><li><a href="module-UserContext.html">UserContext</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Cart">Cart</a></li><li><a href="global.html#CheckoutForm">CheckoutForm</a></li><li><a href="global.html#ProductPage">ProductPage</a></li><li><a href="global.html#PurchaseSummary">PurchaseSummary</a></li><li><a href="global.html#useCart">useCart</a></li><li><a href="global.html#useUserData">useUserData</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 19:40:26 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

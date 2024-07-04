@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Pages/Profile/profile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Pages/Profile/profile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview MyProfile component allows users to view and update their profile information.
+ * It includes functionalities for updating first name, last name, email, and password.
+ * Password strength is displayed, and validation errors are shown as needed.
+ */
+import React, { useState, useEffect } from "react";
+import useUserData from "./userData";
+import { useUser } from "../../Context/UserContext";
+import "./profile.css";
+
+/**
+ * MyProfile component.
+ * Displays and allows updating user profile information.
+ * @returns {JSX.Element}
+ */
+export default function MyProfile() {
+  const { user } = useUser();
+  console.log("logging user object from profile", user);
+  const { userData, loading, updateUserData } = useUserData(user.username);
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState("");
+
+  /**
+   * Simple algorithm to calculate password strength.
+   * @param {string} password - The password to test.
+   * @returns {string} The strength of the password: "Weak", "Medium", or "Strong".
+   */
+  const calculatePasswordStrength = (password) => {
+    let strength = "Weak";
+    const strongPasswordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (password.length >= 8 &amp;&amp; strongPasswordRegex.test(password)) {
+      strength = "Strong";
+    } else if (password.length >= 6) {
+      strength = "Medium";
+    }
+
+    return strength;
+  };
+
+  useEffect(() => {
+    if (userData) {
+      setUsername(userData.username);
+      setFirstName(userData.first_name);
+      setLastName(userData.last_name);
+      setEmail(userData.email);
+      setPassword("");
+      setConfirmPassword("");
+    }
+  }, [userData]);
+
+  /**
+   * Handles input changes for the form fields.
+   * @param {object} event - The event object from the input change.
+   */
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    if (name === "password") {
+      setPasswordStrength(calculatePasswordStrength(value));
+    }
+    if (name === "password") {
+      setPassword(value);
+    } else if (name === "confirmPassword") {
+      setConfirmPassword(value);
+    } else if (name === "email") {
+      setEmail(value);
+    } else if (name === "firstName") {
+      setFirstName(value);
+    } else if (name === "lastName") {
+      setLastName(value);
+    }
+  };
+
+  /**
+   * Validates the form inputs.
+   * @returns {boolean} True if all inputs are valid, otherwise false.
+   */
+  const handleValidation = async () => {
+    const currentErrors = {};
+
+    if (!firstName.trim()) {
+      currentErrors.firstName = "First name is required.";
+    } else if (firstName.length > 40) {
+      currentErrors.firstName = "First name length cannot be greater than 40.";
+    }
+
+    if (!lastName.trim()) {
+      currentErrors.lastName = "Last name is required.";
+    } else if (lastName.length > 40) {
+      currentErrors.lastName = "Last name length cannot be greater than 40.";
+    }
+
+    if (!email.trim()) {
+      currentErrors.email = "Email is required.";
+    } else if (email.length > 100) {
+      currentErrors.email = "Email length cannot be greater than 100.";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      currentErrors.email = "Invalid email format.";
+    }
+
+    if (
+      password &amp;&amp;
+      (password.length &lt; 8 || !/(?=.*[A-Z])(?=.*\d)/.test(password))
+    ) {
+      currentErrors.password =
+        "Password must be at least 8 characters long and include at least one uppercase letter and one digit.";
+    }
+
+    if (password !== confirmPassword) {
+      currentErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    setErrors(currentErrors);
+    return Object.keys(currentErrors).length === 0;
+  };
+
+  /**
+   * Handles updating the user profile.
+   */
+  const handleUpdate = async () => {
+    const isValid = await handleValidation();
+    if (!isValid) return;
+
+    const updatedData = {
+      username,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+    };
+
+    if (password) {
+      updatedData.password = password;
+    }
+
+    updateUserData(updatedData);
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  };
+
+  return (
+    &lt;div className="profile-bg">
+      &lt;div className="profile-container">
+        &lt;h1>Welcome to your profile, {userData.first_name}!&lt;/h1>
+        &lt;h2>Update your details below&lt;/h2>
+        &lt;label>
+          &lt;h3>Username:&lt;/h3>
+          &lt;p className="value">{userData.username}&lt;/p>
+        &lt;/label>
+        &lt;label>
+          &lt;h3>First Name:&lt;/h3>
+          &lt;input
+            type="text"
+            name="firstName"
+            value={firstName}
+            onChange={handleInputChange}
+          />
+          {errors.firstName &amp;&amp; (
+            &lt;div className="text-danger">{errors.firstName}&lt;/div>
+          )}
+        &lt;/label>
+        &lt;label>
+          &lt;h3>Last Name:&lt;/h3>
+          &lt;input
+            type="text"
+            name="lastName"
+            value={lastName}
+            onChange={handleInputChange}
+          />
+          {errors.lastName &amp;&amp; (
+            &lt;div className="text-danger">{errors.lastName}&lt;/div>
+          )}
+        &lt;/label>
+        &lt;label>
+          &lt;h3>Email:&lt;/h3>
+          &lt;input
+            type="email"
+            name="email"
+            value={email}
+            onChange={handleInputChange}
+          />
+          {errors.email &amp;&amp; &lt;div className="text-danger">{errors.email}&lt;/div>}
+        &lt;/label>
+        &lt;label>
+          &lt;h3>Password (leave blank if not changing):&lt;/h3>
+          &lt;input
+            type="password"
+            name="password"
+            value={password}
+            placeholder="Enter new password"
+            onChange={handleInputChange}
+          />
+          {errors.password &amp;&amp; (
+            &lt;div className="text-danger">{errors.password}&lt;/div>
+          )}
+          {password &amp;&amp; (
+            &lt;div
+              className={`password-strength ${passwordStrength.toLowerCase()}`}
+            >
+              Password strength: {passwordStrength}
+            &lt;/div>
+          )}
+        &lt;/label>
+        &lt;label>
+          &lt;h3>Confirm Password:&lt;/h3>
+          &lt;input
+            type="password"
+            name="confirmPassword"
+            value={confirmPassword}
+            placeholder="Confirm new password"
+            onChange={handleInputChange}
+          />
+          {errors.confirmPassword &amp;&amp; (
+            &lt;div className="text-danger">{errors.confirmPassword}&lt;/div>
+          )}
+        &lt;/label>
+        &lt;button className="update-button" onClick={handleUpdate}>
+          Update Profile
+        &lt;/button>
+      &lt;/div>
+      {showPopup &amp;&amp; (
+        &lt;div className="popup">
+          &lt;div className="popup-inner">
+            &lt;h2>Profile updated successfully!&lt;/h2>
+          &lt;/div>
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Repository.html">Repository</a></li><li><a href="module-UserContext.html">UserContext</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Cart">Cart</a></li><li><a href="global.html#CheckoutForm">CheckoutForm</a></li><li><a href="global.html#ProductPage">ProductPage</a></li><li><a href="global.html#PurchaseSummary">PurchaseSummary</a></li><li><a href="global.html#useCart">useCart</a></li><li><a href="global.html#useUserData">useUserData</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 19:40:26 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

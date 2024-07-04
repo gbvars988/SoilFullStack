@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Pages/Products/products.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Pages/Products/products.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Products component that fetches and displays a list of products,
+ * allows users to add products to the cart, and displays the cart subtotal.
+ */
+
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "./products.css";
+import Apple from "../../Assets/apple.jpg";
+import Banana from "../../Assets/banana.jpg";
+import Pear from "../../Assets/pear.jpg";
+import Strawberry from "../../Assets/strawberry.jpg";
+import Grape from "../../Assets/grape.jpg";
+import Kiwi from "../../Assets/kiwi.jpg";
+import Orange from "../../Assets/orange.jpg";
+import Pineapple from "../../Assets/pineapple.jpg";
+import Watermelon from "../../Assets/watermelon.jpg";
+import Steak from "../../Assets/steak.jpg";
+import Lobster from "../../Assets/lobster.jpg";
+import Caviar from "../../Assets/caviar.jpg";
+import Truffle from "../../Assets/truffle.jpg";
+import Oyster from "../../Assets/oyster.jpg";
+import { useCart } from "../../Pages/Cart/useCart";
+import { getProducts } from "../../Data/repository";
+import ReactStars from "react-stars";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+/**
+ * Products component.
+ * Fetches (from API) and displays products and handles adding products to the cart.
+ * @returns {JSX.Element}
+ */
+export default function Products() {
+  const [products, setProducts] = useState([]);
+  const [specialProducts, setSpecialProducts] = useState([]);
+  const { cart, addToCart, clearCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        console.log("Fetched products data: ", data);
+        setProducts(data.filter((product) => !product.is_special));
+        setSpecialProducts(data.filter((product) => product.is_special));
+      } catch (error) {
+        console.log("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  /**
+   * Calculate the subtotal of the items in the cart.
+   * @returns {number} The subtotal of the items in the cart.
+   */
+  const calculateSubtotal = () => {
+    return Object.values(cart).reduce((total, product) => {
+      return total + product.price * product.quantity;
+    }, 0);
+  };
+
+  const productImages = {
+    Apple: Apple,
+    Banana: Banana,
+    Pear: Pear,
+    Strawberry: Strawberry,
+    Grape: Grape,
+    Kiwi: Kiwi,
+    Orange: Orange,
+    Pineapple: Pineapple,
+    Watermelon: Watermelon,
+    Steak: Steak,
+    Lobster: Lobster,
+    Caviar: Caviar,
+    Truffle: Truffle,
+    Oyster: Oyster,
+  };
+
+  /**
+   * Handles adding a product to the cart and shows a success toast message.
+   * @param {object} product - The product to add to the cart.
+   */
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  return (
+    &lt;div className="products-bg">
+      &lt;div className="cart-subtotal">
+        &lt;h2>Cart Subtotal&lt;/h2>
+        &lt;p>${calculateSubtotal().toFixed(2)}&lt;/p>
+        &lt;button className="button" onClick={clearCart}>
+          Clear Cart
+        &lt;/button>
+        &lt;Link to="/cart">
+          &lt;button className="button">View Cart&lt;/button>
+        &lt;/Link>
+      &lt;/div>
+      &lt;div className="container">
+        &lt;div className="products-container">
+          &lt;h2>Standard Products&lt;/h2>
+          &lt;div className="normal-products">
+            {products.map((product) => (
+              &lt;div key={product.product_id} className="product-container">
+                &lt;Link to={`/products/${product.product_id}`}>
+                  &lt;img
+                    src={productImages[product.name]}
+                    alt={product.name}
+                    className="product-image"
+                  />
+                  &lt;h3>{product.name}&lt;/h3>
+                &lt;/Link>
+                &lt;p className="product-description">{product.description}&lt;/p>
+                &lt;p>Price: ${product.price}&lt;/p>
+                &lt;ReactStars
+                  count={5}
+                  value={product.reviews?.[0]?.averageRating || 0}
+                  size={24}
+                  color2={"#ffd700"}
+                  edit={false}
+                  half={false}
+                />
+                &lt;button
+                  className="button"
+                  onClick={() => handleAddToCart(product)}
+                >
+                  Add to Cart
+                &lt;/button>
+              &lt;/div>
+            ))}
+          &lt;/div>
+          &lt;h2>Special Products&lt;/h2>
+          &lt;div className="special-products">
+            {specialProducts.map((product) => (
+              &lt;div key={product.product_id} className="product-container">
+                &lt;Link to={`/products/${product.product_id}`}>
+                  &lt;img
+                    src={productImages[product.name]}
+                    alt={product.name}
+                    className="product-image"
+                  />
+                  &lt;h3>{product.name}&lt;/h3>
+                &lt;/Link>
+                &lt;p className="product-description">{product.description}&lt;/p>
+                &lt;p>Price: ${product.price}&lt;/p>
+                &lt;ReactStars
+                  count={5}
+                  value={product.reviews?.[0]?.averageRating || 0}
+                  size={24}
+                  color2={"#ffd700"}
+                  edit={false}
+                  half={false}
+                />
+                &lt;button
+                  className="button"
+                  onClick={() => handleAddToCart(product)}
+                >
+                  Add to Cart
+                &lt;/button>
+              &lt;/div>
+            ))}
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+      &lt;ToastContainer />
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Repository.html">Repository</a></li><li><a href="module-UserContext.html">UserContext</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Cart">Cart</a></li><li><a href="global.html#CheckoutForm">CheckoutForm</a></li><li><a href="global.html#ProductPage">ProductPage</a></li><li><a href="global.html#PurchaseSummary">PurchaseSummary</a></li><li><a href="global.html#useCart">useCart</a></li><li><a href="global.html#useUserData">useUserData</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jun 16 2024 19:40:26 GMT+1000 (Australian Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

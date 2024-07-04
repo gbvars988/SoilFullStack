@@ -1,0 +1,33 @@
+{
+  "name": "backend2",
+  "version": "1.0.0",
+  "description": "Node.js Rest API with Express, Sequelize and Cloud MySQL",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js",
+    "doc": "jsdoc -r ./src -d ./docs"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "sequelize",
+    "mysql",
+    "rest",
+    "api"
+  ],
+  "author": "Anthony",
+  "license": "ISC",
+  "dependencies": {
+    "argon2": "^0.40.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.9.8",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.3",
+    "nodemon": "^3.1.3"
+  }
+}

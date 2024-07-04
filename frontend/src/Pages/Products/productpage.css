@@ -1,0 +1,187 @@
+.product-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.product-page h1,
+.product-page h2 {
+  text-align: center;
+}
+
+.product-page .product-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.product-page .product-details img {
+  max-width: 50%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.product-page .product-details p {
+  text-align: justify;
+}
+
+.product-page .add-to-cart-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.product-page .add-to-cart-button:hover {
+  background-color: var(--accent-hover-color);
+}
+
+.review,
+.reply {
+  margin: 20px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.follow-buttons,
+.review-buttons,
+.reply-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.review-buttons button,
+.reply-buttons button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.review-buttons button:hover,
+.reply-buttons button:hover {
+  background-color: #0056b3;
+}
+
+.review-buttons button:nth-child(2),
+.reply-buttons button:nth-child(2) {
+  background-color: #dc3545;
+}
+
+.review-buttons button:nth-child(2):hover,
+.reply-buttons button:nth-child(2):hover {
+  background-color: #c82333;
+}
+
+.follow-buttons button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ffc107;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.follow-buttons button:hover {
+  background-color: #e0a800;
+}
+
+.reply {
+  margin-left: 20px;
+}
+
+.review input,
+.review select {
+  margin-top: 10px;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.submit-review-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-review-button:hover {
+  background-color: #218838;
+}
+
+.reply-button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #17a2b8;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reply-button:hover {
+  background-color: #138496;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.word-count {
+  font-size: 14px;
+  color: #777;
+  margin-top: 10px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button.active {
+  background-color: var(--accent-hover-color);
+}
+
+.pagination button:hover {
+  background-color: var(--accent-hover-color);
+}
